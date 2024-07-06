@@ -22,6 +22,7 @@ zip_file_path = os.path.join(os.path.dirname(__file__), 'data', 'main_df.zip')
 with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
     # List all contents of the ZIP file
     zip_contents = zip_ref.namelist()
+    st.write(f"Contents of the ZIP file: {zip_contents}")
     
     # Assuming the CSV file is the first file in the ZIP (change if necessary)
     csv_filename = zip_contents[0]
