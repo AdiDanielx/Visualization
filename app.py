@@ -15,22 +15,27 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded")
 
-# Define the relative path to the ZIP file
-zip_file_path = os.path.join(os.path.dirname(__file__), 'data', 'main_df.zip')
+# Fallback to current working directory if __file__ is not available
+base_dir = os.path.dirname(__file__) if '__file__' in globals() else os.getcwd()
+zip_file_path = os.path.join(base_dir, 'data', 'main_df.zip')
 
-# Open the ZIP file
-with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-    # List all contents of the ZIP file
-    zip_contents = zip_ref.namelist()
-    st.write(f"Contents of the ZIP file: {zip_contents}")
-    
-    # Assuming the CSV file is the first file in the ZIP (change if necessary)
-    csv_filename = zip_contents[0]
-    
-    # Open the CSV file within the ZIP file
-    with zip_ref.open(csv_filename) as csv_file:
-        # Read the CSV file into a pandas DataFrame
-        df = pd.read_csv(csv_file)
+# Check if the file exists
+if not os.path.exists(zip_file_path):
+    st.error(f"File not found: {zip_file_path}")
+else:
+    # Open the ZIP file
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        # List all contents of the ZIP file
+        zip_contents = zip_ref.namelist()
+        st.write(f"Contents of the ZIP file: {zip_contents}")
+        
+        # Assuming the CSV file is the first file in the ZIP (change if necessary)
+        csv_filename = zip_contents[0]
+        
+        # Open the CSV file within the ZIP file
+        with zip_ref.open(csv_filename) as csv_file:
+            # Read the CSV file into a pandas DataFrame
+            df = pd.read_csv(csv_file)
 
 # Load your dataset
 # df = pd.read_csv('Datasets\main_df.csv')
