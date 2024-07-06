@@ -4,6 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import seaborn as sns
+import zipfile
 
 
 # Page configuration
@@ -14,9 +15,24 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded")
 
+# Define the relative path to the ZIP file
+zip_file_path = os.path.join(os.path.dirname(__file__), 'data', 'main_df.zip')
+
+# Open the ZIP file
+with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+    # List all contents of the ZIP file
+    zip_contents = zip_ref.namelist()
+    
+    # Assuming the CSV file is the first file in the ZIP (change if necessary)
+    csv_filename = zip_contents[0]
+    
+    # Open the CSV file within the ZIP file
+    with zip_ref.open(csv_filename) as csv_file:
+        # Read the CSV file into a pandas DataFrame
+        df = pd.read_csv(csv_file)
 
 # Load your dataset
-df = pd.read_csv('Datasets\main_df.csv')
+# df = pd.read_csv('Datasets\main_df.csv')
 
 #SideBar
 with st.sidebar:
