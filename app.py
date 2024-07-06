@@ -216,26 +216,13 @@ def filter_and_plot(df, selected_skill_name):
     df_filtered = df[['views', 'applies', 'company_size', 'skill_name']]
     df_filtered = df_filtered[df_filtered['company_size'] != 'Not Specified']
     
-    # Convert 'company_size' to an ordered category
-    size_order = ['1.0', '2.0', '3.0', '4.0', '5.0', '6.0']
-    df_filtered['company_size'] = pd.Categorical(df_filtered['company_size'], categories=size_order, ordered=True)
-    
     # Filter the dataframe based on the selected skill
     df_filtered = df_filtered[df_filtered['skill_name'].str.contains(selected_skill_name, case=False, na=False)]
     
-    # Custom color palette
-    custom_palette = {
-        '1.0': '#F5E800',
-        '2.0': '#F59B00',
-        '3.0': '#00F570',
-        '4.0': '#00C6F5',
-        '5.0': '#C600F5',
-        '6.0': '#E67185'
-    }
     
     # Plot the data
     plt.figure(figsize=(10, 6))
-    sns.scatterplot(data=df_filtered, x='views', y='applies', hue='company_size', palette=custom_palette, alpha=0.7)
+    sns.scatterplot(data=df_filtered, x='views', y='applies', hue='company_size', palette='viridis', alpha=0.7)
     plt.title('Views vs Applications by Company Size')
     plt.xlabel('Number of Views')
     plt.ylabel('Number of Applications')
@@ -247,6 +234,8 @@ def filter_and_plot(df, selected_skill_name):
     
     # Show the plot in Streamlit
     st.pyplot(plt)
+
+
 col = st.columns((4,5), gap='medium')
 
 # with col[0]:
