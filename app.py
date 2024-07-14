@@ -7,7 +7,7 @@ df = pd.read_csv('main_df_subset.csv')
 
 st.set_page_config(
     page_title="Skills Analysis: Job Market Insights",
-    page_icon = 'final/linkedinlogo.gif',
+    page_icon = 'linkedinlogo.gif',
     layout="wide",
     initial_sidebar_state="expanded")
 
