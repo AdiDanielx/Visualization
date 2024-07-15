@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import base64
 
 df = pd.read_csv('main_df_subset.csv')
 
@@ -11,7 +12,17 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded")
 
-st.markdown(f"## LinkedIn Job Market Dashboard: Skills & Salaries")
+image_path = 'linkedin.png'
+with open(image_path, "rb") as image_file:
+    encoded_image = base64.b64encode(image_file.read()).decode()
+
+st.markdown(f"""
+    <div style='text-align: center; border: 2px solid #0077B5; padding: 10px; border-radius: 10px; background-color: #FAFAFA; margin-bottom: 20px;'>
+        <img src="data:image/png;base64,{encoded_image}" width="50" height="50" style="vertical-align: middle; margin-right: 10px;">
+        <span style="font-size: 24px; font-weight: bold;">LinkedIn Job Market Dashboard: Skills & Salaries</span>
+        <p>Explore key trends in LinkedIn job postings across the USA. This dashboard highlights state-wise distribution of job postings, the relationship between skills and job types, top employers by skill and state, and salary variations by company size and skill. Use the filters to gain insights into the job market dynamics for your selected skill and state.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 df = pd.read_csv('main_df_subset.csv')
 
