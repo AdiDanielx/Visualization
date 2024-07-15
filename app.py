@@ -122,7 +122,7 @@ with row1_col1:
                                             bins=color_ranges,
                                             labels=labels,
                                             include_lowest=True)
-    colors = [ '#93C6E7', '#8EA7E9','#AEE2FF',
+    colors = [ '#93C6E7', '#E8A0BF','#AEE2FF',
     ]
     color_map = {label: colors[i] for i, label in enumerate(labels)}
 
