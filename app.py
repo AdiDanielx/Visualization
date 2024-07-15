@@ -122,7 +122,7 @@ with row1_col1:
                                             bins=color_ranges,
                                             labels=labels,
                                             include_lowest=True)
-    colors = [ '#CAF4FF', '#FFE0B5','#C6CFFF',
+    colors = [ '#93C6E7', '#8EA7E9','#AEE2FF',
     ]
     color_map = {label: colors[i] for i, label in enumerate(labels)}
 
@@ -174,7 +174,7 @@ with row1_col2:
         source.append(label_to_index[row['skill_name']])
         target.append(label_to_index[row['formatted_experience_level']])
         value.append(row['count'])
-    skill_colors = ['#E8D3FF', '#C6CFFF', '#A6E3E9', '#CAF4FF', '#FFE0B5']
+    skill_colors = ['#93C6E7 ', '#8EA7E9 ', '#AEE2FF', '#E8A0BF', '#CAB8FF']
     skill_color_map = {skill: skill_colors[i] for i, skill in enumerate(top_skills)}
     node_colors = []
     for label in all_labels:
@@ -240,12 +240,12 @@ with row2_col2:
 
         top_5_data = top_5_data.sort_values('job_count', ascending=False)
         color_map = {
-            "Internship": "#C6CFFF",
-            "Entry level": "#CAF4FF",
-            "Associate": "#A6E3E9",
-            "Mid-Senior level": "#E8D3FF",
-            "Director": "#FFE0B5",
-            "Executive": "#92A9BD"
+            "Internship": "#93C6E7 ",
+            "Entry level": "#8EA7E9 ",
+            "Associate": "#AEE2FF ",
+            "Mid-Senior level": "#E8A0BF  ",
+            "Director": "#CAB8FF",
+            "Executive": "#F0E4D7"
         }
 
         fig3 = px.bar(
@@ -305,10 +305,10 @@ with row2_col1:
         fig = px.box(df_expanded, x='company_size_label', y='salary', color='applies_category',
                     labels={'company_size_label': 'Company Size', 'salary': 'Salary', 'applies_category': 'Applies Category'},
                     color_discrete_map={
-                        'No\nApplications': '#E8D3FF',  
-                        'Below Average\nApplications': '#C6CFFF',   
-                        'Average\nApplications': '#A6E3E9', 
-                        'Above Average\nApplications': '#CAF4FF'   
+                        'No\nApplications': '#93C6E7',  
+                        'Below Average\nApplications': '#8EA7E9',   
+                        'Average\nApplications': '#AEE2FF', 
+                        'Above Average\nApplications': '#E8A0BF'   
                     },
                     category_orders={
                         'company_size_label': ['2-50 employees', '51-200 employees', '201-500 employees', '501-1000 employees', 
