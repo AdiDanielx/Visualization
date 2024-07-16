@@ -83,22 +83,41 @@ with st.sidebar:
 
 filtered_df_skill_state = df[(df['skill_name'] == selected_skill_name) & (df['state'] == selected_state_abbreviation)]
 
+
 if not filtered_df_skill_state.empty:
     min_salary = filtered_df_skill_state['min_salary'].min()
     max_salary = filtered_df_skill_state['max_salary'].max()
     avg_salary = (filtered_df_skill_state['min_salary'] + filtered_df_skill_state['max_salary']).mean() / 2
-
-    st.sidebar.subheader('Salary Statistics')
+    st.sidebar.subheader(f'Salary Statistics for {selected_skill_name} in {selected_state_abbreviation}')
     st.sidebar.write(f"Minimum Salary: ${min_salary:,.2f}")
     st.sidebar.write(f"Average Salary: ${avg_salary:,.2f}")
     st.sidebar.write(f"Maximum Salary: ${max_salary:,.2f}")
 
-    num_job_postings = filtered_df_skill_state.shape[0]  # Counting rows which gives number of job postings
-    st.sidebar.subheader('Number of Job Postings')
+    num_job_postings = filtered_df_skill_state.shape[0]  
+    st.sidebar.subheader(f'Number of Job Postings for {selected_skill_name} in {selected_state_abbreviation}')
     st.sidebar.write(f"Total: {num_job_postings}")  
     top_5_companies = filtered_df_skill_state['company_name'].value_counts().head(5)
     
-    st.sidebar.subheader('Top Companies in State for Skill')
+    st.sidebar.subheader(f'Top Companies in {selected_state_abbreviation} for {selected_skill_name}')
+    for company, count in top_5_companies.items():
+        st.sidebar.write(f"{company}: {count} job postings")
+else:
+    state_filtered = df[df['skill_name'] == selected_skill_name]
+    min_salary = state_filtered['min_salary'].min()
+    max_salary = state_filtered['max_salary'].max()
+    avg_salary = (state_filtered['min_salary'] + filtered_df_skill_state['max_salary']).mean() / 2
+
+    st.sidebar.subheader(f'Salary Statistics for {selected_skill_name}')
+    st.sidebar.write(f"Minimum Salary: ${min_salary:,.2f}")
+    st.sidebar.write(f"Average Salary: ${avg_salary:,.2f}")
+    st.sidebar.write(f"Maximum Salary: ${max_salary:,.2f}")
+
+    num_job_postings = state_filtered.shape[0]  
+    st.sidebar.subheader(f'Number of Job Postings in {selected_skill_name}')
+    st.sidebar.write(f"Total: {num_job_postings}")  
+    top_5_companies = state_filtered['company_name'].value_counts().head(5)
+    
+    st.sidebar.subheader(f'Top Companies in {selected_skill_name}')
     for company, count in top_5_companies.items():
         st.sidebar.write(f"{company}: {count} job postings")
 
@@ -133,7 +152,7 @@ with row1_col1:
                                             bins=color_ranges,
                                             labels=labels,
                                             include_lowest=True)
-    colors = [ '#93C6E7', '#E8A0BF','#AEE2FF',
+    colors = [ '#deebf7', '#6baed6','#3182bd',
     ]
     color_map = {label: colors[i] for i, label in enumerate(labels)}
 
@@ -185,7 +204,7 @@ with row1_col2:
         source.append(label_to_index[row['skill_name']])
         target.append(label_to_index[row['formatted_experience_level']])
         value.append(row['count'])
-    skill_colors = ['#93C6E7 ', '#8EA7E9 ', '#AEE2FF', '#E8A0BF', '#CAB8FF']
+    skill_colors = ['#D3F4FF', '#B2DFFB', '#B1E8ED', '#C6CBEF', '#CDFFEB']
     skill_color_map = {skill: skill_colors[i] for i, skill in enumerate(top_skills)}
     node_colors = []
     for label in all_labels:
@@ -226,6 +245,29 @@ with row2_col2:
     filtered_df_skill = df[df['skill_name'] == selected_skill_name]
 
     filtered_df_state = filtered_df_skill[filtered_df_skill['state'] == selected_state_abbreviation]
+    unique_companies = filtered_df_state['company_name'].nunique()
+
+    filter_use = "both"
+    if filtered_df_state.empty:
+        if not filtered_df_skill.empty:
+            filtered_df_state = filtered_df_skill
+            filter_use = "skill"
+        else:
+            filtered_df_state = df[df['state'] == selected_state_abbreviation]
+            filter_use = "state"
+            if filtered_df_state.empty:
+                filtered_df_state = df
+                filter_use = "Not Both"
+                
+    if unique_companies ==1:
+        if not filtered_df_skill.empty and filtered_df_skill['company_name'].nunique() !=1:
+            filtered_df_state = filtered_df_skill
+            filter_use = "skill"
+        else:
+            filtered_df_state = df[df['state'] == selected_state_abbreviation]
+            if filtered_df_state['company_name'].nunique() !=1:
+                filtered_df_state = df[df['state'] == selected_state_abbreviation]
+                filter_use = "state"
 
     available_work_types = filtered_df_state['formatted_work_type'].unique()
     if 'selected_work_type' not in st.session_state:
@@ -245,20 +287,17 @@ with row2_col2:
     with col1:
         filtered_df = filtered_df_state[filtered_df_state['formatted_work_type'].isin([selected_work_type])]
         company_experience_data = filtered_df.groupby(['company_name', 'formatted_experience_level']).size().reset_index(name='job_count')
-
         top_5_companies = company_experience_data.groupby('company_name')['job_count'].sum().nlargest(5).index
         top_5_data = company_experience_data[company_experience_data['company_name'].isin(top_5_companies)]
-
         top_5_data = top_5_data.sort_values('job_count', ascending=False)
         color_map = {
-            "Internship": "#93C6E7 ",
-            "Entry level": "#8EA7E9 ",
-            "Associate": "#AEE2FF ",
-            "Mid-Senior level": "#E8A0BF  ",
-            "Director": "#CAB8FF",
-            "Executive": "#F0E4D7"
+            "Internship": "#DAE1E7",
+            "Entry level": "#AEDADD",
+            "Associate": "#9ecae1",
+            "Mid-Senior level": "#6baed6",
+            "Director": "#3182bd",
+            "Executive": "#08519c"
         }
-
         fig3 = px.bar(
             top_5_data,
             x='company_name',
@@ -267,9 +306,11 @@ with row2_col2:
             labels={'job_count': 'Job Count', 'company_name': 'Company', 'formatted_experience_level': 'Experience Level'},
             barmode='stack',
             color_discrete_map=color_map,
+            category_orders={
+                'formatted_experience_level': ["Internship", "Entry level", "Associate", "Mid-Senior level", "Director", "Executive"]
+            },
             hover_data={'company_name': False}
         )
-
         fig3.update_layout(
             xaxis=dict(
                 title='Company',
@@ -280,16 +321,20 @@ with row2_col2:
                 title='Job Count',
                 range=[0, top_5_data['job_count'].max() + 10]
             )
-            
         )
-
-        st.markdown(f"##### Top Companies for {selected_skill_name} in {selected_state_full_name}: Distribution by Experience Level of {selected_work_type}")
+        if filter_use is "both":
+            st.markdown(f"##### Top Companies for {selected_skill_name} in {selected_state_full_name}:Distribution by Experience Level of {selected_work_type}")
+        if filter_use is "skill":
+            st.markdown(f"##### Top Companies for {selected_skill_name} :Distribution by Experience Level of {selected_work_type}")
+        if filter_use is "state":
+            st.markdown(f"##### Top Companies in {selected_state_full_name}: Distribution by Experience Level of {selected_work_type}")
+        if filter_use is "Not Both":
+            st.markdown(f"##### Top Companies : Distribution by Experience Level of {selected_work_type}")
         st.plotly_chart(fig3, use_container_width=True)
-        
+
     
 ########################BOX PLOT #######################
 with row2_col1:
-
     def box_plot(df, selected_skill_name):
         filter_box = df[df['skill_name'] == selected_skill_name]
         filter_box['salary'] = df.apply(lambda row: [row['min_salary'], row['max_salary']], axis=1)
@@ -297,36 +342,30 @@ with row2_col1:
         df_expanded['salary'] = pd.to_numeric(df_expanded['salary'], errors='coerce')
         df_expanded['applies'] = pd.to_numeric(df_expanded['applies'], errors='coerce')
         df_expanded = df_expanded.dropna(subset=['salary', 'applies'])
-                
+
+        top_company_sizes = df_expanded.groupby('company_size_label')['salary'].max().nlargest(3).index.tolist()
+        df_expanded = df_expanded[df_expanded['company_size_label'].isin(top_company_sizes)]
+
         applies_description = df_expanded['applies'].describe()
-        
         def categorize_applies(x):
             if x == 0:
-                return 'No\nApplications'
-            elif x <= applies_description['50%']:
-                return 'Below Average\nApplications'
+                return 'No Applications'
             elif x <= applies_description['75%']:
-                return 'Average\nApplications'
+                return 'Average Applications'
             else:
-                return 'Above Average\nApplications'
-        
+                return 'Above Average Applications'
         df_expanded['applies_category'] = df_expanded['applies'].apply(categorize_applies)
-        df_expanded = df_expanded[df_expanded['skill_name'].str.contains(selected_skill_name, case=False, na=False)]
-            
+
         fig = px.box(df_expanded, x='company_size_label', y='salary', color='applies_category',
-                    labels={'company_size_label': 'Company Size', 'salary': 'Salary', 'applies_category': 'Applies Category'},
-                    color_discrete_map={
-                        'No\nApplications': '#93C6E7',  
-                        'Below Average\nApplications': '#8EA7E9',   
-                        'Average\nApplications': '#AEE2FF', 
-                        'Above Average\nApplications': '#E8A0BF'   
-                    },
-                    category_orders={
-                        'company_size_label': ['2-50 employees', '51-200 employees', '201-500 employees', '501-1000 employees', 
-                                               '1001-5000 employees', '5001-10,000 employees', '10,001+ employees'],
-                        'applies_category': ['No Applications', 'Below Average Applications', 'Average Applications', 'Above Average Applications']
-                    },
-                    points=False)  
+                     labels={'company_size_label': 'Company Size', 'salary': 'Salary', 'applies_category': 'Applies Category'},
+                     color_discrete_map={
+                         'No Applications': '#9ecae1',
+                         'Average Applications': '#4292c6',
+                         'Above Average Applications': '#08306b'
+                     },
+                     category_orders={'company_size_label': top_company_sizes,
+                                      'applies_category': ['No Applications', 'Average Applications', 'Above Average Applications']},
+                     points=False)
         fig.update_layout(
             xaxis_title='Company Size',
             yaxis_title='Salary',
@@ -336,11 +375,7 @@ with row2_col1:
             width=800,
             yaxis_range=[0, df_expanded['salary'].max() + 20000]  
         )
-        
-        st.markdown(f"##### Salary Distribution by Company Size for {selected_skill_name}")
-
+        st.markdown(f"##### Salary Distribution by top 3 Company Size for {selected_skill_name}")
         st.plotly_chart(fig)
-
     if selected_skill_name:
         box_plot(df, selected_skill_name)
-
