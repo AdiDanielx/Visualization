@@ -344,26 +344,28 @@ with row2_col1:
         df_expanded = df_expanded.dropna(subset=['salary', 'applies'])
 
         top_company_sizes = df_expanded.groupby('company_size_label')['salary'].max().nlargest(3).index.tolist()
-        df_expanded = df_expanded[df_expanded['company_size_label'].isin(top_company_sizes)]
+        company_size_sorted = sorted(top_company_sizes, key=lambda x: list(company_size_mapping.values()).index(x))
+
+        df_expanded = df_expanded[df_expanded['company_size_label'].isin(company_size_sorted)]
 
         applies_description = df_expanded['applies'].describe()
         def categorize_applies(x):
             if x == 0:
-                return 'No Applications'
+                return 'No\nApplications'
             elif x <= applies_description['75%']:
-                return 'Average Applications'
+                return 'Average\nApplications'
             else:
-                return 'Above Average Applications'
+                return 'Above Average\nApplications'
         df_expanded['applies_category'] = df_expanded['applies'].apply(categorize_applies)
 
         fig = px.box(df_expanded, x='company_size_label', y='salary', color='applies_category',
                      labels={'company_size_label': 'Company Size', 'salary': 'Salary', 'applies_category': 'Applies Category'},
                      color_discrete_map={
-                         'No Applications': '#9ecae1',
-                         'Average Applications': '#4292c6',
-                         'Above Average Applications': '#08306b'
+                         'No\nApplications': '#9ecae1',
+                         'Average\nApplications': '#4292c6',
+                         'Above Average\nApplications': '#08306b'
                      },
-                     category_orders={'company_size_label': top_company_sizes,
+                     category_orders={'company_size_label': company_size_sorted,
                                       'applies_category': ['No Applications', 'Average Applications', 'Above Average Applications']},
                      points=False)
         fig.update_layout(
