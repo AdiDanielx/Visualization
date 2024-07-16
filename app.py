@@ -366,7 +366,7 @@ with row2_col1:
                          'Above Average\nApplications': '#08306b'
                      },
                      category_orders={'company_size_label': company_size_sorted,
-                                      'applies_category': ['No Applications', 'Average Applications', 'Above Average Applications']},
+                                      'applies_category':  ['No\nApplications', 'Average\nApplications', 'Above Average\nApplications']},
                      points=False)
         fig.update_layout(
             xaxis_title='Company Size',
