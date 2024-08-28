@@ -106,7 +106,7 @@ with st.sidebar:
     div.stButton > button:first-child {
         background-color: #fed98e;
         color: #08519c;
-        font-weight: bold;
+        # font-weight: bold;
         border-radius: 5px;
         width: 100%;
         height: 40px;
