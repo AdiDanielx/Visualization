@@ -2,321 +2,382 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import matplotlib.pyplot as plt
-import seaborn as sns
-import zipfile
+import base64
 
-
-# Page configuration
+df = pd.read_csv('main_df_subset.csv')
 
 st.set_page_config(
-    page_title="Top Skills in Job Posts",
-    page_icon = "💼",
+    page_title="Skills Analysis: Job Market Insights",
+    page_icon = 'linkedinlogo.gif',
     layout="wide",
     initial_sidebar_state="expanded")
 
-# Fallback to current working directory if __file__ is not available
-base_dir = os.path.dirname(__file__) if '__file__' in globals() else os.getcwd()
-zip_file_path = os.path.join(base_dir, 'data', 'main_df.zip')
+image_path = 'linkedin.png'
+with open(image_path, "rb") as image_file:
+    encoded_image = base64.b64encode(image_file.read()).decode()
 
-# Check if the file exists
-if not os.path.exists(zip_file_path):
-    st.error(f"File not found: {zip_file_path}")
-else:
-    # Open the ZIP file
-    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-        # List all contents of the ZIP file
-        zip_contents = zip_ref.namelist()
-        st.write(f"Contents of the ZIP file: {zip_contents}")
-        
-        # Assuming the CSV file is the first file in the ZIP (change if necessary)
-        csv_filename = zip_contents[0]
-        
-        # Open the CSV file within the ZIP file
-        with zip_ref.open(csv_filename) as csv_file:
-            # Read the CSV file into a pandas DataFrame
-            df = pd.read_csv(csv_file)
+st.markdown(f"""
+    <div style='text-align: center; border: 2px solid #0077B5; padding: 10px; border-radius: 10px; background-color: #FAFAFA; margin-bottom: 20px;'>
+        <img src="data:image/png;base64,{encoded_image}" width="50" height="50" style="vertical-align: middle; margin-right: 10px;">
+        <span style="font-size: 24px; font-weight: bold;">LinkedIn Job Market Dashboard: Skills & Salaries</span>
+        <p>Explore key trends in LinkedIn job postings across the USA. This dashboard highlights state-wise distribution of job postings, the relationship between skills and job types, top employers by skill and state, and salary variations by company size and skill. Use the filters to gain insights into the job market dynamics for your selected skill and state.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Load your dataset
-# df = pd.read_csv('Datasets\main_df.csv')
+df = pd.read_csv('main_df_subset.csv')
 
-#SideBar
+state_mapping = {
+    'NJ': 'New Jersey', 'IL': 'Illinois', 'NY': 'New York', 'CA': 'California', 'PA': 'Pennsylvania', 
+    'WI': 'Wisconsin', 'WA': 'Washington', 'NC': 'North Carolina', 'OH': 'Ohio', 'GA': 'Georgia', 
+    'KY': 'Kentucky', 'FL': 'Florida', 'MD': 'Maryland', 'TX': 'Texas', 'VA': 'Virginia', 
+    'MI': 'Michigan', 'SD': 'South Dakota', 'IN': 'Indiana', 'NE': 'Nebraska', 'MO': 'Missouri', 
+    'MA': 'Massachusetts', 'TN': 'Tennessee', 'LA': 'Louisiana', 'DC': 'District of Columbia', 
+    'AR': 'Arkansas', 'OK': 'Oklahoma', 'UT': 'Utah', 'MN': 'Minnesota', 'AZ': 'Arizona', 'CT': 'Connecticut', 
+    'RI': 'Rhode Island', 'ME': 'Maine', 'NH': 'New Hampshire', 'CO': 'Colorado', 'AL': 'Alabama', 
+    'KS': 'Kansas', 'ID': 'Idaho', 'HI': 'Hawaii', 'OR': 'Oregon', 'NV': 'Nevada', 'NM': 'New Mexico', 
+    'VT': 'Vermont', 'IA': 'Iowa', 'SC': 'South Carolina', 'DE': 'Delaware', 'ND': 'North Dakota', 
+    'MS': 'Mississippi', 'WY': 'Wyoming', 'MT': 'Montana', 'AK': 'Alaska'
+}
+
+# Reverse mapping for filtering purposes
+reverse_state_mapping = {v: k for k, v in state_mapping.items()}
+
+df_filtered_state = df.copy()
+df_filtered_state['state'] = df_filtered_state['state'].replace(state_mapping)
+df_filtered_state = df_filtered_state[df_filtered_state['state'].isin(state_mapping.values())]
+df['state_full_name'] = df['state'].replace(state_mapping)
+if 'selected_state' not in st.session_state:
+    st.session_state.selected_state = 'CA' 
+     
+# Company size mapping
+company_size_mapping = {
+    1.0: '2-50 employees',
+    2.0: '51-200 employees',
+    3.0: '201-500 employees',
+    4.0: '501-1000 employees',
+    5.0: '1001-5000 employees',
+    6.0: '5001-10,000 employees',
+    7.0: '10,001+ employees'
+    }
+df['company_size_label'] = df['company_size'].map(company_size_mapping)
+df['company_size_label'] = pd.Categorical(df['company_size_label'], categories=[
+    '2-50 employees', '51-200 employees', '201-500 employees', '501-1000 employees',
+    '1001-5000 employees', '5001-10,000 employees', '10,001+ employees'], ordered=True)
+
+########################Side Bar#################################
+
 with st.sidebar:
-    st.sidebar.title("Skills")
+    st.sidebar.title("Search Filters")
     unique_skill_names = df['skill_name'].dropna().unique()
-    selected_skill_name = st.sidebar.selectbox('Select Skill:', unique_skill_names)
-
-
-def create_skill_map(df, selected_skill_name):
-    filtered_data = df[df['skill_name'] == selected_skill_name]
-    aggregated_data = filtered_data.groupby(['state', 'company_name']).agg({
-        'job_id': 'count',
-        'min_salary': 'min'
-    }).reset_index()
-    aggregated_data.columns = ['state', 'company_name', 'job_count', 'min_salary']
-    top_companies_per_state = aggregated_data.sort_values(['state', 'job_count'], ascending=[True, False]).groupby('state').head(3)
-    aggregated_data = aggregated_data.groupby('state').agg({
-        'job_count': 'sum',
-        'min_salary': 'min'
-    }).reset_index()
-    hover_data = []
-    for state in aggregated_data['state']:
-        top_companies = top_companies_per_state[top_companies_per_state['state'] == state]
-        companies_str = "<br>".join([f"{row['company_name']}: {row['job_count']}" for _, row in top_companies.iterrows()])
-        hover_data.append(companies_str)
-
-    aggregated_data['top_companies'] = hover_data
-    hover_template = (
-        "<b>State:</b> %{hovertext}<br>"
-        "<b>Number of Jobs:</b> %{customdata[0]}<br>"
-        "<b>Minimum Salary:</b> $%{customdata[1]:,.2f}<br>"
-        "<b>Top Companies Hiring:</b><br>%{customdata[2]}"
+    selected_skill_name = st.sidebar.selectbox('Select Skill:', unique_skill_names, key='skill_select')
+    unique_states = list(state_mapping.keys())
+    selected_state_abbreviation = st.sidebar.selectbox(
+        "Select a State",
+        unique_states,
+        index=unique_states.index(st.session_state.selected_state),
+        key='state_select'
     )
+    st.session_state.selected_state = selected_state_abbreviation
+    selected_state_full_name = state_mapping[selected_state_abbreviation]
+
+
+filtered_df_skill_state = df[(df['skill_name'] == selected_skill_name) & (df['state'] == selected_state_abbreviation)]
+
+
+if not filtered_df_skill_state.empty:
+    min_salary = filtered_df_skill_state['min_salary'].min()
+    max_salary = filtered_df_skill_state['max_salary'].max()
+    avg_salary = (filtered_df_skill_state['min_salary'] + filtered_df_skill_state['max_salary']).mean() / 2
+    st.sidebar.subheader(f'Salary Statistics for {selected_skill_name} in {selected_state_abbreviation}')
+    st.sidebar.write(f"Minimum Salary: ${min_salary:,.2f}")
+    st.sidebar.write(f"Average Salary: ${avg_salary:,.2f}")
+    st.sidebar.write(f"Maximum Salary: ${max_salary:,.2f}")
+
+    num_job_postings = filtered_df_skill_state.shape[0]  
+    st.sidebar.subheader(f'Number of Job Postings for {selected_skill_name} in {selected_state_abbreviation}')
+    st.sidebar.write(f"Total: {num_job_postings}")  
+    top_5_companies = filtered_df_skill_state['company_name'].value_counts().head(5)
+    
+    st.sidebar.subheader(f'Top Companies in {selected_state_abbreviation} for {selected_skill_name}')
+    for company, count in top_5_companies.items():
+        st.sidebar.write(f"{company}: {count} job postings")
+else:
+    state_filtered = df[df['skill_name'] == selected_skill_name]
+    min_salary = state_filtered['min_salary'].min()
+    max_salary = state_filtered['max_salary'].max()
+    avg_salary = (state_filtered['min_salary'] + filtered_df_skill_state['max_salary']).mean() / 2
+
+    st.sidebar.subheader(f'Salary Statistics for {selected_skill_name}')
+    st.sidebar.write(f"Minimum Salary: ${min_salary:,.2f}")
+    st.sidebar.write(f"Average Salary: ${avg_salary:,.2f}")
+    st.sidebar.write(f"Maximum Salary: ${max_salary:,.2f}")
+
+    num_job_postings = state_filtered.shape[0]  
+    st.sidebar.subheader(f'Number of Job Postings in {selected_skill_name}')
+    st.sidebar.write(f"Total: {num_job_postings}")  
+    top_5_companies = state_filtered['company_name'].value_counts().head(5)
+    
+    st.sidebar.subheader(f'Top Companies in {selected_skill_name}')
+    for company, count in top_5_companies.items():
+        st.sidebar.write(f"{company}: {count} job postings")
+
+#########################COL########################
+row1_col1, row1_col2 = st.columns(2)
+
+#########################COL 1########################
+
+with row1_col1:
+########################MAP PLOT#################################
+
+    filtered_df = df[df['skill_name'] == selected_skill_name]
+
+    state_job_counts = filtered_df.groupby('state')['job_id'].count().reset_index()
+    state_job_counts.columns = ['state', 'job_count']
+
+    min_job_count = state_job_counts['job_count'].min()
+    max_job_count = state_job_counts['job_count'].max()
+    num_bins = 3
+    if max_job_count == min_job_count:
+        max_job_count += 1
+    color_ranges = pd.cut(state_job_counts['job_count'], bins=num_bins, retbins=True)[1]
+
+    def format_label(value):
+        if value >= 1000:
+            return f'{int(round(value/1000))}K'
+        else:
+            return f'{int(value)}'
+        
+    labels = [f'{(format_label(color_ranges[i]))} - {(format_label(color_ranges[i+1]))}' for i in range(len(color_ranges) - 1)]
+    state_job_counts['color_label'] = pd.cut(state_job_counts['job_count'],
+                                            bins=color_ranges,
+                                            labels=labels,
+                                            include_lowest=True)
+    colors = [ '#deebf7', '#6baed6','#3182bd',
+    ]
+    color_map = {label: colors[i] for i, label in enumerate(labels)}
+
+    state_job_counts['color'] = state_job_counts['color_label'].map(color_map)
+
+    ticktext = labels
+    tickvals = list(range(len(labels)))
+
     fig = px.choropleth(
-        aggregated_data,
+        state_job_counts,
         locations='state',
-        locationmode="USA-states", 
-        color='job_count',  
-        hover_name='state',
-        hover_data={
-            'job_count': True,
-            'min_salary': True,
-            'top_companies': True
-        },
-        scope="usa", 
-        # title=f'Number of Jobs for "{selected_skill_name}" by State',
-        labels={'job_count': 'Number of Jobs'},
-        color_continuous_scale=px.colors.sequential.Blues  
+        locationmode='USA-states',
+        color='color_label', 
+        scope='usa',
+        color_discrete_map=color_map,  
+        labels={'job_count': 'Job Count', 'color_label': 'Job Count Range'},  
+        category_orders={"color_label": labels}  
     )
+    fig.update_geos(projection_type="albers usa")
     fig.update_traces(
-        hovertemplate=hover_template,
-        customdata=aggregated_data[['job_count', 'min_salary', 'top_companies']].values,
-        hovertext=aggregated_data['state']
+        hovertemplate='<b>%{location}</b><br>Job Count=%{customdata[0]}<extra></extra>',
+        customdata=state_job_counts[['job_count', 'state']]
     )
 
-    return fig
+    fig.update_layout(coloraxis_colorbar=dict(
+        title="Open Jobs",
+        tickvals=tickvals,
+        ticktext=ticktext,
+        lenmode="pixels", len=300, yanchor="top", y=1,
+        ticks="outside"
+    ))
+    st.markdown(f'##### Skill Distribution in Job Postings for {selected_skill_name} across the USA')
 
-def create_visualization(page, skill_data_page1, skill_data_page2, experience_skill_data):
-    if page == "Page 1: Top Skills by Job Postings Count":
-        # Format the job_count to include commas
-        skill_data_page1['formatted_job_count'] = skill_data_page1['job_count'].apply(lambda x: f"{x:,}")
+    st.plotly_chart(fig)
 
-        # Bar plot for job count
-        fig1 = px.bar(
-            skill_data_page1,
-            x='skill_name',
-            y='job_count',
-            text='formatted_job_count',
-            title='Top Skills by Job Postings Count',
-            labels={'job_count': 'Number of Job Postings', 'skill_name': 'Skill'}
+########################SNAKEY PLOT#######################
+with row1_col2:
+    state_filtered = df[df['state'] == selected_state_abbreviation]
+    top_skills = state_filtered['skill_name'].value_counts()
+    top_skills = top_skills[top_skills.index != 'other'].head(5).index.tolist()
+    state_filtered = state_filtered[state_filtered['skill_name'].isin(top_skills)]
+    all_labels = list(set(state_filtered['skill_name']).union(set(state_filtered['formatted_experience_level'])))
+    label_to_index = {label: i for i, label in enumerate(all_labels)}
+    source = []
+    target = []
+    value = []
+    skills_to_exp = state_filtered.groupby(['skill_name', 'formatted_experience_level']).size().reset_index(name='count')
+    for _, row in skills_to_exp.iterrows():
+        source.append(label_to_index[row['skill_name']])
+        target.append(label_to_index[row['formatted_experience_level']])
+        value.append(row['count'])
+    skill_colors = ['#D3F4FF', '#B2DFFB', '#B1E8ED', '#C6CBEF', '#CDFFEB']
+    skill_color_map = {skill: skill_colors[i] for i, skill in enumerate(top_skills)}
+    node_colors = []
+    for label in all_labels:
+        if label in skill_color_map:
+            node_colors.append(skill_color_map[label])
+        else:
+            node_colors.append("rgba(0, 0, 0, 0.1)")  # Light grey for other nodes
+    link_colors = []
+    for _, row in skills_to_exp.iterrows():
+        link_colors.append(skill_color_map[row['skill_name']])
+    fig = go.Figure(data=[go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=all_labels,
+            color=node_colors
+        ),
+        link=dict(
+            source=source,
+            target=target,
+            value=value,
+            color=link_colors
+        )
+    )])
+    st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
+
+
+    st.plotly_chart(fig)
+
+
+#########################COL 2########################
+row2_col1, row2_col2 = st.columns(2)
+######################## BAR CHART #######################
+with row2_col2:
+
+    col1, col2 = st.columns([4, 1])
+    filtered_df_skill = df[df['skill_name'] == selected_skill_name]
+
+    filtered_df_state = filtered_df_skill[filtered_df_skill['state'] == selected_state_abbreviation]
+    unique_companies = filtered_df_state['company_name'].nunique()
+
+    filter_use = "both"
+    if filtered_df_state.empty:
+        if not filtered_df_skill.empty:
+            filtered_df_state = filtered_df_skill
+            filter_use = "skill"
+        else:
+            filtered_df_state = df[df['state'] == selected_state_abbreviation]
+            filter_use = "state"
+            if filtered_df_state.empty:
+                filtered_df_state = df
+                filter_use = "Not Both"
+                
+    if unique_companies ==1:
+        if not filtered_df_skill.empty and filtered_df_skill['company_name'].nunique() !=1:
+            filtered_df_state = filtered_df_skill
+            filter_use = "skill"
+        else:
+            filtered_df_state = df[df['state'] == selected_state_abbreviation]
+            if filtered_df_state['company_name'].nunique() !=1:
+                filtered_df_state = df[df['state'] == selected_state_abbreviation]
+                filter_use = "state"
+
+    available_work_types = filtered_df_state['formatted_work_type'].unique()
+    if 'selected_work_type' not in st.session_state:
+        st.session_state.selected_work_type = available_work_types[0] if available_work_types.size > 0 else None
+
+    with col2:
+        selected_work_type = st.radio(
+            "Select Work Type",
+            available_work_types,
+            index=0 if st.session_state.selected_work_type is None else available_work_types.tolist().index(st.session_state.selected_work_type)
         )
 
-        # Update the text position and template to include commas
-        fig1.update_traces(textposition='outside', texttemplate='%{text}')
+        st.session_state.selected_work_type = selected_work_type
 
-        # Add scrollbar functionality to the x-axis
-        fig1.update_layout(
-            xaxis=dict(
-                title='Skill',
-                tickangle=-45,
-                automargin=True,
-                rangeslider=dict(
-                    visible=True
-                ),
-                range=[0, 8]  # Initially show only a part of the data
-            ),
-            yaxis=dict(
-                title='Number of Job Postings',
-                range=[0, 55000]  
-            ),
-            height=700,  # Adjust height to make the plot bigger
-            margin=dict(l=20, r=20, t=30, b=20)  # Adjust margins to use space better
-        )
+    selected_work_type = st.session_state.selected_work_type
 
-        return fig1
-
-    elif page == "Page 2: Average Salary by Skill":
-        # Line plot for average salary
-        fig2 = go.Figure()
-
-        fig2.add_trace(
-            go.Scatter(
-                x=skill_data_page1['skill_name'],
-                y=skill_data_page1['average_salary'],
-                name='Average Max Salary ($)',
-                mode='lines+markers',
-                hoverinfo='y',
-                hovertemplate='<b>%{y:$,.2f}</b><extra></extra>',
-                line=dict(color='#9d65f5')  # Specify color for the max salary line
-            )
-        )
-
-        fig2.add_trace(
-            go.Scatter(
-                x=skill_data_page1['skill_name'],
-                y=skill_data_page1['average_min_salary'],
-                name='Average Min Salary ($)',
-                mode='lines+markers',
-                hoverinfo='y',
-                hovertemplate='<b>%{y:$,.2f}</b><extra></extra>',
-                line=dict(color='#658df5')  # Specify color for the min salary line
-            )
-        )
-
-        fig2.update_layout(
-            title='Average Salary by Skill',
-            xaxis=dict(
-                title='Skill',
-                tickangle=-45,
-                automargin=True,
-                rangeslider=dict(
-                    visible=True
-                ),
-                range=[0, 8]  # Initially show only a part of the data
-            ),
-            yaxis=dict(
-                title='Average Salary ($)',
-                tickformat='$,.0f'
-            ),
-            legend=dict(
-                title='Legend',
-                itemsizing='constant'
-            ),
-            height=700,  # Adjust height to make the plot bigger
-            margin=dict(l=20, r=20, t=30, b=20)  # Adjust margins to use space better
-        )
-
-        return fig2
-
-    elif page == "Page 3: Skills and Experience Levels":
-        # Define a consistent color map for experience levels
+    with col1:
+        filtered_df = filtered_df_state[filtered_df_state['formatted_work_type'].isin([selected_work_type])]
+        company_experience_data = filtered_df.groupby(['company_name', 'formatted_experience_level']).size().reset_index(name='job_count')
+        top_5_companies = company_experience_data.groupby('company_name')['job_count'].sum().nlargest(5).index
+        top_5_data = company_experience_data[company_experience_data['company_name'].isin(top_5_companies)]
+        top_5_data = top_5_data.sort_values('job_count', ascending=False)
         color_map = {
-            "Internship": "#77dd77",   # Pastel green
-            "Entry level": "#ff6961",  # Pastel red
-            "Associate": "#779ecb",    # Pastel blue
-            "Mid-Senior level": "#cfcfc4",  # Pastel gray
-            "Director": "#ffb347",     # Pastel orange
-            "Executive": "#ffb3ba",    # Pastel pink
-            "Not Specified": "#b19cd9" # Pastel purple
+            "Internship": "#DAE1E7",
+            "Entry level": "#AEDADD",
+            "Associate": "#9ecae1",
+            "Mid-Senior level": "#6baed6",
+            "Director": "#3182bd",
+            "Executive": "#08519c"
         }
-
-        # Create stacked bar chart
         fig3 = px.bar(
-            experience_skill_data,
-            x='skill_name',
+            top_5_data,
+            x='company_name',
             y='job_count',
             color='formatted_experience_level',
-            title='Stacked Bar Chart of Skills and Experience Levels',
-            labels={'job_count': 'Job Count', 'skill_name': 'Skill', 'formatted_experience_level': 'Experience Level'},
+            labels={'job_count': 'Job Count', 'company_name': 'Company', 'formatted_experience_level': 'Experience Level'},
             barmode='stack',
-            color_discrete_map=color_map  # Apply color map
+            color_discrete_map=color_map,
+            category_orders={
+                'formatted_experience_level': ["Internship", "Entry level", "Associate", "Mid-Senior level", "Director", "Executive"]
+            },
+            hover_data={'company_name': False}
         )
-
-        # Add scrollbar functionality to the x-axis
         fig3.update_layout(
             xaxis=dict(
-                title='Skill',
+                title='Company',
                 tickangle=-45,
                 automargin=True,
-                rangeslider=dict(
-                    visible=True
-                ),
-                range=[0, 8]  # Initially show only a part of the data
             ),
             yaxis=dict(
                 title='Job Count',
-                range=[0, 55000] 
-            ),
-            height=700,  # Adjust height to make the plot bigger
-            margin=dict(l=20, r=20, t=30, b=20)  # Adjust margins to use space better
+                range=[0, top_5_data['job_count'].max() + 10]
+            )
         )
+        if filter_use is "both":
+            st.markdown(f"##### Top Companies for {selected_skill_name} in {selected_state_full_name}:Distribution by Experience Level of {selected_work_type}")
+        if filter_use is "skill":
+            st.markdown(f"##### Top Companies for {selected_skill_name} :Distribution by Experience Level of {selected_work_type}")
+        if filter_use is "state":
+            st.markdown(f"##### Top Companies in {selected_state_full_name}: Distribution by Experience Level of {selected_work_type}")
+        if filter_use is "Not Both":
+            st.markdown(f"##### Top Companies : Distribution by Experience Level of {selected_work_type}")
+        st.plotly_chart(fig3, use_container_width=True)
 
-        return fig3
     
-def filter_and_plot(df, selected_skill_name):
-    # Filter necessary columns and remove rows with "Not Specified" company size
-    df_filtered = df[['views', 'applies', 'company_size', 'skill_name']]
-    df_filtered = df_filtered[df_filtered['company_size'] != 'Not Specified']
-    
-    # Filter the dataframe based on the selected skill
-    df_filtered = df_filtered[df_filtered['skill_name'].str.contains(selected_skill_name, case=False, na=False)]
-    
-    
-    # Plot the data
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(data=df_filtered, x='views', y='applies', hue='company_size', palette='viridis', alpha=0.7)
-    plt.title('Views vs Applications by Company Size')
-    plt.xlabel('Number of Views')
-    plt.ylabel('Number of Applications')
-    plt.legend(title='Company Size')
-    
-    # Set axis limits
-    plt.xlim(0, 100)
-    plt.ylim(0, 25)
-    
-    # Show the plot in Streamlit
-    st.pyplot(plt)
+########################BOX PLOT #######################
+with row2_col1:
+    def box_plot(df, selected_skill_name):
+        filter_box = df[df['skill_name'] == selected_skill_name]
+        filter_box['salary'] = df.apply(lambda row: [row['min_salary'], row['max_salary']], axis=1)
+        df_expanded = filter_box.explode('salary')
+        df_expanded['salary'] = pd.to_numeric(df_expanded['salary'], errors='coerce')
+        df_expanded['applies'] = pd.to_numeric(df_expanded['applies'], errors='coerce')
+        df_expanded = df_expanded.dropna(subset=['salary', 'applies'])
 
+        top_company_sizes = df_expanded.groupby('company_size_label')['salary'].max().nlargest(3).index.tolist()
+        company_size_sorted = sorted(top_company_sizes, key=lambda x: list(company_size_mapping.values()).index(x))
 
-col = st.columns((4,5), gap='medium')
+        df_expanded = df_expanded[df_expanded['company_size_label'].isin(company_size_sorted)]
 
-# with col[0]:
-#     st.markdown('#### Gains/Losses')
+        applies_description = df_expanded['applies'].describe()
+        def categorize_applies(x):
+            if x == 0:
+                return 'No\nApplications'
+            elif x <= applies_description['75%']:
+                return 'Average\nApplications'
+            else:
+                return 'Above Average\nApplications'
+        df_expanded['applies_category'] = df_expanded['applies'].apply(categorize_applies)
 
-with col[0]:
-    st.markdown('#### Demand for Skills Across USA State')
-    fig = create_skill_map(df, selected_skill_name)
-    st.plotly_chart(fig, use_container_width=True)
-    st.markdown('#### Job Posting Analysis: Views, Applications, and Company Size')
-    filter_and_plot(df, selected_skill_name)
-
-
-
-
-with col[1]:
-    st.markdown('#### Insights into Job Postings and Skills Demand')
-
-        # Aggregate data by skill_name for page 1
-    skill_data_page1 = df.groupby('skill_name').agg(
-        job_count=('job_id', 'count'),
-        average_salary=('max_salary', 'mean'),
-        average_min_salary=('min_salary', 'mean')
-    ).reset_index()
-
-    # Replacing NaN values with 0 for average_salary in case some skills do not have salary data
-    skill_data_page1['average_salary'].fillna(0, inplace=True)
-    skill_data_page1['average_min_salary'].fillna(0, inplace=True)
-
-    # Aggregate data by skill_name for page 2
-    skill_data_page2 = df.groupby('skill_name').agg(
-        job_count=('job_id', 'count'),
-        average_salary=('max_salary', 'mean')
-    ).reset_index()
-
-    # Replacing NaN values with 0 for average_salary in case some skills do not have salary data
-    skill_data_page2['average_salary'].fillna(0, inplace=True)
-
-    # Aggregate data by skill_name and formatted_experience_level for page 3
-    experience_skill_data = df.groupby(['formatted_experience_level', 'skill_name']).size().reset_index(name='job_count')
-
-    # Aggregate total job count by skill_name
-    total_job_count_by_skill = experience_skill_data.groupby('skill_name')['job_count'].sum().reset_index()
-
-    # Sort skills by total job count
-    sorted_skills = total_job_count_by_skill.sort_values('job_count', ascending=False)['skill_name']
-
-    # Ensure experience_skill_data is sorted by skill_name based on total job count
-    experience_skill_data['skill_name'] = pd.Categorical(experience_skill_data['skill_name'], categories=sorted_skills, ordered=True)
-    experience_skill_data = experience_skill_data.sort_values('skill_name')
-
-    # Sort data by job count for all pages
-    skill_data_page1 = skill_data_page1.sort_values('job_count', ascending=False)
-    skill_data_page2 = skill_data_page2.sort_values('job_count', ascending=False)
-    experience_skill_data = experience_skill_data.sort_values('job_count', ascending=False)
-
-    # Define the page navigation
-    page = st.selectbox("Choose a page:", ["Page 1: Top Skills by Job Postings Count", "Page 2: Average Salary by Skill", "Page 3: Skills and Experience Levels"])
-
-    # Display the selected visualization
-    fig = create_visualization(page, skill_data_page1, skill_data_page2, experience_skill_data)
-    st.plotly_chart(fig, use_container_width=True)
+        fig = px.box(df_expanded, x='company_size_label', y='salary', color='applies_category',
+                     labels={'company_size_label': 'Company Size', 'salary': 'Salary', 'applies_category': 'Applies Category'},
+                     color_discrete_map={
+                         'No\nApplications': '#9ecae1',
+                         'Average\nApplications': '#4292c6',
+                         'Above Average\nApplications': '#08306b'
+                     },
+                     category_orders={'company_size_label': company_size_sorted,
+                                      'applies_category':  ['No\nApplications', 'Average\nApplications', 'Above Average\nApplications']},
+                     points=False)
+        fig.update_layout(
+            xaxis_title='Company Size',
+            yaxis_title='Salary',
+            xaxis_tickangle=-45,
+            showlegend=True,
+            height=600,
+            width=800,
+            yaxis_range=[0, df_expanded['salary'].max() + 20000]  
+        )
+        st.markdown(f"##### Salary Distribution by top 3 Company Size for {selected_skill_name}")
+        st.plotly_chart(fig)
+    if selected_skill_name:
+        box_plot(df, selected_skill_name)
