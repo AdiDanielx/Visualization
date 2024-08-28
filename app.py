@@ -272,6 +272,7 @@ with row1_col2:
     )])
 
 
+    fig.update_traces(texttemplate='%{customdata}')
 
     st.plotly_chart(fig)
 
