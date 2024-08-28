@@ -224,6 +224,57 @@ with row1_col1:
     st.plotly_chart(fig)
 
 ########################SNAKEY PLOT#######################
+# with row1_col2:
+#     state_filtered = df[df['state'] == selected_state_abbreviation]
+#     top_skills = state_filtered['skill_name'].value_counts()
+#     top_skills = top_skills[top_skills.index != 'other'].head(5).index.tolist()
+#     state_filtered = state_filtered[state_filtered['skill_name'].isin(top_skills)]
+#     all_labels = list(set(state_filtered['skill_name']).union(set(state_filtered['formatted_experience_level'])))
+#     label_to_index = {label: i for i, label in enumerate(all_labels)}
+#     source = []
+#     target = []
+#     value = []
+#     skills_to_exp = state_filtered.groupby(['skill_name', 'formatted_experience_level']).size().reset_index(name='count')
+#     for _, row in skills_to_exp.iterrows():
+#         source.append(label_to_index[row['skill_name']])
+#         target.append(label_to_index[row['formatted_experience_level']])
+#         value.append(row['count'])
+        
+#     if st.session_state.blinds_mode == 'On':
+#         skill_colors = ['#dfc27d', '#80cdc1', '#f1b6da', '#b2abd2', '#ffffbf']
+#     else:
+#         skill_colors = ['#E8D3FF', '#C6CFFF', '#A6E3E9', '#CAF4FF', '#FFE0B5']
+#         # skill_colors = ['#D3F4FF', '#B2DFFB', '#B1E8ED', '#C6CBEF', '#CDFFEB']
+#     skill_color_map = {skill: skill_colors[i] for i, skill in enumerate(top_skills)}
+#     node_colors = []
+#     for label in all_labels:
+#         if label in skill_color_map:
+#             node_colors.append(skill_color_map[label])
+#         else:
+#             node_colors.append("rgba(0, 0, 0, 0.1)")  # Light grey for other nodes
+#     link_colors = []
+#     for _, row in skills_to_exp.iterrows():
+#         link_colors.append(skill_color_map[row['skill_name']])
+        
+#     fig = go.Figure(data=[go.Sankey(
+#         node=dict(
+#             pad=15,
+#             thickness=20,
+#             line=dict(color="black", width=0.5),
+#             label=all_labels,
+#             color=node_colors
+#         ),
+#         link=dict(
+#             source=source,
+#             target=target,
+#             value=value,
+#             color=link_colors
+#         )
+#     )])
+#     st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
+
+
+#     st.plotly_chart(fig)
 with row1_col2:
     state_filtered = df[df['state'] == selected_state_abbreviation]
     top_skills = state_filtered['skill_name'].value_counts()
@@ -239,12 +290,7 @@ with row1_col2:
         source.append(label_to_index[row['skill_name']])
         target.append(label_to_index[row['formatted_experience_level']])
         value.append(row['count'])
-        
-    if st.session_state.blinds_mode == 'On':
-        skill_colors = ['#dfc27d', '#80cdc1', '#f1b6da', '#b2abd2', '#ffffbf']
-    else:
-        skill_colors = ['#E8D3FF', '#C6CFFF', '#A6E3E9', '#CAF4FF', '#FFE0B5']
-        # skill_colors = ['#D3F4FF', '#B2DFFB', '#B1E8ED', '#C6CBEF', '#CDFFEB']
+    skill_colors = ['#E8D3FF', '#C6CFFF', '#A6E3E9', '#CAF4FF', '#FFE0B5']
     skill_color_map = {skill: skill_colors[i] for i, skill in enumerate(top_skills)}
     node_colors = []
     for label in all_labels:
@@ -255,7 +301,6 @@ with row1_col2:
     link_colors = []
     for _, row in skills_to_exp.iterrows():
         link_colors.append(skill_color_map[row['skill_name']])
-        
     fig = go.Figure(data=[go.Sankey(
         node=dict(
             pad=15,
