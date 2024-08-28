@@ -101,19 +101,6 @@ with st.sidebar:
     blinds_mode = 'Off'
     if 'blinds_mode' not in st.session_state:
         st.session_state.blinds_mode = 'Off'
-    st.markdown("""
-    <style>
-    div.stButton > button:first-child {
-        background-color: #fed98e;
-        color: #08519c;
-        # font-weight: bold;
-        border-radius: 5px;
-        width: 100%;
-        height: 40px;
-        font-size: 16px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
     
     if 'blinds_mode' not in st.session_state:
         st.session_state.blinds_mode = 'Off'
