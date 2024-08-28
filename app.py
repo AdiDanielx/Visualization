@@ -269,7 +269,7 @@ with row1_col2:
         value=value,
         color=link_colors
     )
-    )])
+)])
 
 
     fig.update_traces(texttemplate='%{customdata}')
