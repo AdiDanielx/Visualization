@@ -8,11 +8,11 @@ df = pd.read_csv('main_df_subset.csv')
 
 st.set_page_config(
     page_title="Skills Analysis: Job Market Insights",
-    page_icon = 'linkedinlogo.gif',
+    page_icon = 'final\linkedinlogo.gif',
     layout="wide",
     initial_sidebar_state="expanded")
 
-image_path = 'linkedin.png'
+image_path = 'final\linkedin.png'
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
 
@@ -265,6 +265,7 @@ with row1_col2:
     link_colors = []
     for _, row in skills_to_exp.iterrows():
         link_colors.append(skill_color_map[row['skill_name']])
+        
     fig = go.Figure(data=[go.Sankey(
         node=dict(
             pad=15,
@@ -280,6 +281,31 @@ with row1_col2:
             color=link_colors
         )
     )])
+
+    
+    fig.update_layout(
+        font=dict(
+            family="Arial",  # או כל פונט אחר שתרצה
+            size=12,         # ניתן לשנות את הגודל לפי הצורך
+            color="black"    # או כל צבע שתרצה
+        )
+     )
+
+    # fig = go.Figure(data=[go.Sankey(
+    #     node=dict(
+    #         pad=15,
+    #         thickness=20,
+    #         line=dict(color="black", width=0.5),
+    #         label=all_labels,
+    #         color=node_colors
+    #     ),
+    #     link=dict(
+    #         source=source,
+    #         target=target,
+    #         value=value,
+    #         color=link_colors
+    #     )
+    # )])
     st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
 
 
