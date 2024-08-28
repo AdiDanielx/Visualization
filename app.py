@@ -86,9 +86,6 @@ df['company_size_label'] = pd.Categorical(df['company_size_label'], categories=[
 with st.sidebar:
     st.sidebar.title("Search Filters")
     selected_skill_name = st.sidebar.selectbox('Select Skill:', skills_ordered, key='skill_select')
-    # unique_skill_names = df['skill_name'].dropna().unique()
-    # selected_skill_name = st.sidebar.selectbox('Select Skill:', unique_skill_names, key='skill_select')
-    # unique_states = list(state_mapping.keys())
     ordered_state_abbreviations = [reverse_state_mapping[state] for state in ordered_states if state in reverse_state_mapping]
     selected_state_abbreviation = st.sidebar.selectbox(
         "Select a State",
