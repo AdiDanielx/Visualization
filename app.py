@@ -88,7 +88,6 @@ with st.sidebar:
     if 'blinds_mode' not in st.session_state:
         st.session_state.blinds_mode = 'Off'
     st.session_state.blinds_mode = st.selectbox(
-        'Select Blinds Mode',
         options=['Off', 'On'],
         index=0 if st.session_state.blinds_mode == 'Off' else 1
     )
