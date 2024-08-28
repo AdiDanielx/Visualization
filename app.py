@@ -3,16 +3,17 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import base64
+import numpy as np
 
 df = pd.read_csv('main_df_subset.csv')
 
 st.set_page_config(
     page_title="Skills Analysis: Job Market Insights",
-    page_icon = 'linkedinlogo.gif',
+    page_icon = 'final\linkedinlogo.gif',
     layout="wide",
     initial_sidebar_state="expanded")
 
-image_path = 'linkedin.png'
+image_path = 'final\linkedin.png'
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
 
@@ -38,6 +39,21 @@ state_mapping = {
     'VT': 'Vermont', 'IA': 'Iowa', 'SC': 'South Carolina', 'DE': 'Delaware', 'ND': 'North Dakota', 
     'MS': 'Mississippi', 'WY': 'Wyoming', 'MT': 'Montana', 'AK': 'Alaska'
 }
+ordered_states = [
+    "California", "New York", "Virginia", "New Jersey", "Washington", "Illinois",
+    "Massachusetts", "Texas", "Ohio", "Nebraska", "Alabama", "Alaska", "Arizona",
+    "Arkansas", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Hawaii",
+    "Idaho", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Michigan",
+    "Mississippi", "Missouri", "Montana", "Nevada", "New Hampshire", "New Mexico",
+    "North Dakota", "Oklahoma", "Oregon", "Rhode Island", "Tennessee", "Wyoming",
+    "Maryland", "Pennsylvania", "Florida", "North Carolina", "Utah", "South Dakota",
+    "Minnesota", "Wisconsin", "Georgia", "South Carolina"
+]
+skills_ordered = ["Information Technology","Accounting/Auditing","Engineering","Finance","Sales","Health Care Provider","Management","Manufacturing",
+    "Administrative","Business Development","Product Management","Supply Chain","Production","Public Relations","Science","Strategy/Planning","Research",
+    "Quality Assurance","Advertising","Writing/Editing","Purchasing","Training","Education","Distribution","Legal","Marketing","Project Management",
+    "Analyst","Design","Customer Service","Human Resources","General Business","Consulting","Art/Creative"]
+
 
 # Reverse mapping for filtering purposes
 reverse_state_mapping = {v: k for k, v in state_mapping.items()}
@@ -48,6 +64,7 @@ df_filtered_state = df_filtered_state[df_filtered_state['state'].isin(state_mapp
 df['state_full_name'] = df['state'].replace(state_mapping)
 if 'selected_state' not in st.session_state:
     st.session_state.selected_state = 'CA' 
+unique_states = df_filtered_state['state'].unique()
      
 # Company size mapping
 company_size_mapping = {
@@ -68,18 +85,45 @@ df['company_size_label'] = pd.Categorical(df['company_size_label'], categories=[
 
 with st.sidebar:
     st.sidebar.title("Search Filters")
-    unique_skill_names = df['skill_name'].dropna().unique()
-    selected_skill_name = st.sidebar.selectbox('Select Skill:', unique_skill_names, key='skill_select')
-    unique_states = list(state_mapping.keys())
+    selected_skill_name = st.sidebar.selectbox('Select Skill:', skills_ordered, key='skill_select')
+    # unique_skill_names = df['skill_name'].dropna().unique()
+    # selected_skill_name = st.sidebar.selectbox('Select Skill:', unique_skill_names, key='skill_select')
+    # unique_states = list(state_mapping.keys())
+    ordered_state_abbreviations = [reverse_state_mapping[state] for state in ordered_states if state in reverse_state_mapping]
     selected_state_abbreviation = st.sidebar.selectbox(
         "Select a State",
-        unique_states,
-        index=unique_states.index(st.session_state.selected_state),
+        ordered_state_abbreviations,
+        index=ordered_state_abbreviations.index(st.session_state.selected_state) if st.session_state.selected_state in ordered_state_abbreviations else 0,
         key='state_select'
     )
     st.session_state.selected_state = selected_state_abbreviation
     selected_state_full_name = state_mapping[selected_state_abbreviation]
+    
+    blinds_mode = 'Off'
+    if 'blinds_mode' not in st.session_state:
+        st.session_state.blinds_mode = 'Off'
+    st.markdown("""
+    <style>
+    div.stButton > button:first-child {
+        background-color: #fed98e;
+        color: #08519c;
+        font-weight: bold;
+        border-radius: 5px;
+        width: 100%;
+        height: 40px;
+        font-size: 16px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    if 'blinds_mode' not in st.session_state:
+        st.session_state.blinds_mode = 'Off'
 
+    button_text = f'Blinds Mode: Currently {st.session_state.blinds_mode} '
+
+    if st.button(button_text):
+        st.session_state.blinds_mode = 'On' if st.session_state.blinds_mode == 'Off' else 'Off'
+        st.experimental_rerun() 
 
 filtered_df_skill_state = df[(df['skill_name'] == selected_skill_name) & (df['state'] == selected_state_abbreviation)]
 
@@ -152,8 +196,10 @@ with row1_col1:
                                             bins=color_ranges,
                                             labels=labels,
                                             include_lowest=True)
-    colors = [ '#deebf7', '#6baed6','#3182bd',
-    ]
+    if st.session_state.blinds_mode == 'On':
+        colors = ['#ece7f2','#a6bddb','#2b8cbe',]
+    else:
+        colors = [ '#deebf7', '#6baed6','#3182bd',]
     color_map = {label: colors[i] for i, label in enumerate(labels)}
 
     state_job_counts['color'] = state_job_counts['color_label'].map(color_map)
@@ -204,7 +250,12 @@ with row1_col2:
         source.append(label_to_index[row['skill_name']])
         target.append(label_to_index[row['formatted_experience_level']])
         value.append(row['count'])
-    skill_colors = ['#D3F4FF', '#B2DFFB', '#B1E8ED', '#C6CBEF', '#CDFFEB']
+        
+    if st.session_state.blinds_mode == 'On':
+        skill_colors = ['#dfc27d', '#80cdc1', '#f1b6da', '#b2abd2', '#ffffbf']
+    else:
+        skill_colors = ['#fbb4ae', '#b3cde3', '#ccebc5', '#decbe4', '#fed9a6']
+        # skill_colors = ['#D3F4FF', '#B2DFFB', '#B1E8ED', '#C6CBEF', '#CDFFEB']
     skill_color_map = {skill: skill_colors[i] for i, skill in enumerate(top_skills)}
     node_colors = []
     for label in all_labels:
@@ -215,6 +266,7 @@ with row1_col2:
     link_colors = []
     for _, row in skills_to_exp.iterrows():
         link_colors.append(skill_color_map[row['skill_name']])
+        
     fig = go.Figure(data=[go.Sankey(
         node=dict(
             pad=15,
@@ -245,94 +297,134 @@ with row2_col2:
     filtered_df_skill = df[df['skill_name'] == selected_skill_name]
 
     filtered_df_state = filtered_df_skill[filtered_df_skill['state'] == selected_state_abbreviation]
-    unique_companies = filtered_df_state['company_name'].nunique()
-
-    filter_use = "both"
-    if filtered_df_state.empty:
-        if not filtered_df_skill.empty:
-            filtered_df_state = filtered_df_skill
-            filter_use = "skill"
-        else:
-            filtered_df_state = df[df['state'] == selected_state_abbreviation]
-            filter_use = "state"
-            if filtered_df_state.empty:
-                filtered_df_state = df
-                filter_use = "Not Both"
-                
-    if unique_companies ==1:
-        if not filtered_df_skill.empty and filtered_df_skill['company_name'].nunique() !=1:
-            filtered_df_state = filtered_df_skill
-            filter_use = "skill"
-        else:
-            filtered_df_state = df[df['state'] == selected_state_abbreviation]
-            if filtered_df_state['company_name'].nunique() !=1:
-                filtered_df_state = df[df['state'] == selected_state_abbreviation]
-                filter_use = "state"
 
     available_work_types = filtered_df_state['formatted_work_type'].unique()
-    if 'selected_work_type' not in st.session_state:
+    valid_work_types = []
+    for work_type in available_work_types:
+        num_companies = filtered_df_state[filtered_df_state['formatted_work_type'] == work_type]['company_name'].nunique()
+        if num_companies > 1:
+            valid_work_types.append(work_type)
+
+    # Update the list of available work types after filtering
+    available_work_types = np.array(valid_work_types)
+
+    if 'selected_work_type' not in st.session_state or st.session_state.selected_work_type not in available_work_types:
         st.session_state.selected_work_type = available_work_types[0] if available_work_types.size > 0 else None
 
     with col2:
-        selected_work_type = st.radio(
-            "Select Work Type",
-            available_work_types,
-            index=0 if st.session_state.selected_work_type is None else available_work_types.tolist().index(st.session_state.selected_work_type)
-        )
+        if available_work_types.size > 0:
+            selected_work_type = st.radio(
+                "Select Work Type",
+                available_work_types,
+                index=0 if st.session_state.selected_work_type is None else available_work_types.tolist().index(st.session_state.selected_work_type)
+            )
+        else:
+            selected_work_type = None
 
         st.session_state.selected_work_type = selected_work_type
 
     selected_work_type = st.session_state.selected_work_type
 
-    with col1:
-        filtered_df = filtered_df_state[filtered_df_state['formatted_work_type'].isin([selected_work_type])]
-        company_experience_data = filtered_df.groupby(['company_name', 'formatted_experience_level']).size().reset_index(name='job_count')
-        top_5_companies = company_experience_data.groupby('company_name')['job_count'].sum().nlargest(5).index
-        top_5_data = company_experience_data[company_experience_data['company_name'].isin(top_5_companies)]
-        top_5_data = top_5_data.sort_values('job_count', ascending=False)
-        color_map = {
-            "Internship": "#DAE1E7",
-            "Entry level": "#AEDADD",
-            "Associate": "#9ecae1",
-            "Mid-Senior level": "#6baed6",
-            "Director": "#3182bd",
-            "Executive": "#08519c"
-        }
-        fig3 = px.bar(
-            top_5_data,
-            x='company_name',
-            y='job_count',
-            color='formatted_experience_level',
-            labels={'job_count': 'Job Count', 'company_name': 'Company', 'formatted_experience_level': 'Experience Level'},
-            barmode='stack',
-            color_discrete_map=color_map,
-            category_orders={
-                'formatted_experience_level': ["Internship", "Entry level", "Associate", "Mid-Senior level", "Director", "Executive"]
-            },
-            hover_data={'company_name': False}
-        )
-        fig3.update_layout(
-            xaxis=dict(
-                title='Company',
-                tickangle=-45,
-                automargin=True,
-            ),
-            yaxis=dict(
-                title='Job Count',
-                range=[0, top_5_data['job_count'].max() + 10]
-            )
-        )
-        if filter_use is "both":
-            st.markdown(f"##### Top Companies for {selected_skill_name} in {selected_state_full_name}:Distribution by Experience Level of {selected_work_type}")
-        if filter_use is "skill":
-            st.markdown(f"##### Top Companies for {selected_skill_name} :Distribution by Experience Level of {selected_work_type}")
-        if filter_use is "state":
-            st.markdown(f"##### Top Companies in {selected_state_full_name}: Distribution by Experience Level of {selected_work_type}")
-        if filter_use is "Not Both":
-            st.markdown(f"##### Top Companies : Distribution by Experience Level of {selected_work_type}")
-        st.plotly_chart(fig3, use_container_width=True)
+    if selected_work_type:
+        with col1:
+            filtered_df = filtered_df_state[filtered_df_state['formatted_work_type'].isin([selected_work_type])]
+            company_experience_data = filtered_df.groupby(['company_name', 'formatted_experience_level']).size().reset_index(name='job_count')
+            num_companies = company_experience_data['company_name'].nunique()
+            top_5_companies = company_experience_data.groupby('company_name')['job_count'].sum().nlargest(5).index
+            top_5_data = company_experience_data[company_experience_data['company_name'].isin(top_5_companies)]
 
+            top_5_data = top_5_data.sort_values('job_count', ascending=False)
+
+            if st.session_state.blinds_mode == 'On':
+                color_map = {
+                    "Internship": "#f1eef6",
+                    "Entry level": "#d0d1e6",
+                    "Associate": "#a6bddb",
+                    "Mid-Senior level": "#74a9cf",
+                    "Director": "#2b8cbe",
+                    "Executive": "#045a8d"
+                }
     
+            else:
+                color_map = {
+                    "Internship": "#e7e1ef",
+                    "Entry level": "#9ecae1",
+                    "Associate": "#a6bddb",
+                    "Mid-Senior level": "#74a9cf",
+                    "Director": "#0570b0",
+                    "Executive": "#023858"}
+
+            fig3 = px.bar(
+                top_5_data,
+                x='company_name',
+                y='job_count',
+                color='formatted_experience_level',
+                labels={'job_count': 'Job Count', 'company_name': 'Company', 'formatted_experience_level': 'Experience Level'},
+                barmode='stack',
+                color_discrete_map=color_map,
+                category_orders={'formatted_experience_level': ["Internship", "Entry level", "Associate", "Mid-Senior level", "Director", "Executive"]},
+                hover_data={'company_name': False}
+            )
+
+            fig3.update_layout(
+                xaxis=dict(
+                    title='Company',
+                    tickangle=-45,
+                    automargin=True,
+                ),
+                yaxis=dict(
+                    title='Job Count',
+                    range=[0, top_5_data['job_count'].max() + 10]
+                )
+                
+            )
+
+            st.markdown(f"##### Top Companies for {selected_skill_name} in {selected_state_full_name}: Distribution by Experience Level of {selected_work_type}")
+            st.plotly_chart(fig3, use_container_width=True) 
+    else:
+        st.markdown(f"##### Top Companies for {selected_skill_name}")
+        if not filtered_df_state.empty:
+            top_5_companies = filtered_df_state['company_name'].value_counts().head(5)
+        else:
+            top_5_companies = filtered_df_skill['company_name'].value_counts().head(5)
+            
+        if len(top_5_companies) == 1:
+            selected_skill_count = df[df['skill_name'] == selected_skill_name].shape[0]
+            total_job_postings = df.shape[0] - selected_skill_count
+            pie_data = pd.DataFrame({
+                'Category': [selected_skill_name, 'Others'],
+                'Job Postings': [selected_skill_count, total_job_postings - selected_skill_count]
+            })
+            fig_pie = px.pie(
+            pie_data,
+            names='Category',
+            values='Job Postings',
+            labels={'Job Postings': 'Number of Job Postings'},
+            color_discrete_sequence=['#a6bddb', '#3690c0'])
+
+            fig_pie.update_layout(
+                title=f'Job Postings Distribution for {selected_skill_name}')
+
+            st.plotly_chart(fig_pie, use_container_width=True)
+
+        else:
+            top_5_data = pd.DataFrame({'company_name': top_5_companies.index, 'job_postings': top_5_companies.values})
+
+            fig_fallback = px.bar(
+                top_5_data,
+                x='company_name',
+                y='job_postings',
+                labels={'job_postings': 'Job Postings', 'company_name': 'Company'},
+                color_discrete_sequence=['#3690c0'])
+
+            fig_fallback.update_layout(
+                xaxis=dict(title='Company', tickangle=-45, automargin=True),
+                yaxis=dict(title='Job Postings')
+            )
+
+            st.plotly_chart(fig_fallback, use_container_width=True)
+
+
 ########################BOX PLOT #######################
 with row2_col1:
     def box_plot(df, selected_skill_name):
@@ -358,16 +450,28 @@ with row2_col1:
                 return 'Above Average\nApplications'
         df_expanded['applies_category'] = df_expanded['applies'].apply(categorize_applies)
 
-        fig = px.box(df_expanded, x='company_size_label', y='salary', color='applies_category',
-                     labels={'company_size_label': 'Company Size', 'salary': 'Salary', 'applies_category': 'Applies Category'},
-                     color_discrete_map={
-                         'No\nApplications': '#9ecae1',
-                         'Average\nApplications': '#4292c6',
-                         'Above Average\nApplications': '#08306b'
-                     },
-                     category_orders={'company_size_label': company_size_sorted,
-                                      'applies_category':  ['No\nApplications', 'Average\nApplications', 'Above Average\nApplications']},
-                     points=False)
+        if st.session_state.blinds_mode == 'On':
+            fig = px.box(df_expanded, x='company_size_label', y='salary', color='applies_category',
+                labels={'company_size_label': 'Company Size', 'salary': 'Salary', 'applies_category': 'Applies Category'},
+                color_discrete_map={
+                    'No\nApplications': '#ece7f2',
+                    'Average\nApplications': '#a6bddb',
+                    'Above Average\nApplications': '#2b8cbe'
+                },
+                category_orders={'company_size_label': company_size_sorted,
+                                'applies_category':  ['No\nApplications', 'Average\nApplications', 'Above Average\nApplications']},
+                points=False)
+        else:
+            fig = px.box(df_expanded, x='company_size_label', y='salary', color='applies_category',
+                        labels={'company_size_label': 'Company Size', 'salary': 'Salary', 'applies_category': 'Applies Category'},
+                        color_discrete_map={
+                            'No\nApplications': '#9ecae1',
+                            'Average\nApplications': '#4292c6',
+                            'Above Average\nApplications': '#08306b'
+                        },
+                        category_orders={'company_size_label': company_size_sorted,
+                                        'applies_category':  ['No\nApplications', 'Average\nApplications', 'Above Average\nApplications']},
+                        points=False)
         fig.update_layout(
             xaxis_title='Company Size',
             yaxis_title='Salary',
@@ -381,3 +485,4 @@ with row2_col1:
         st.plotly_chart(fig)
     if selected_skill_name:
         box_plot(df, selected_skill_name)
+        
