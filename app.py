@@ -258,7 +258,7 @@ with row1_col2:
         node=dict(
             pad=15,
             thickness=20,
-            line=dict(color="black", width=0.5),
+            line=dict(color="rgba(0, 0, 0, 0)", width=0),  # הגדרת צבע המסגרת לרקע שקוף ועובי ל-0
             label=all_labels,
             color=node_colors
         ),
