@@ -8,11 +8,11 @@ df = pd.read_csv('main_df_subset.csv')
 
 st.set_page_config(
     page_title="Skills Analysis: Job Market Insights",
-    page_icon = 'final\linkedinlogo.gif',
+    page_icon = 'linkedinlogo.gif',
     layout="wide",
     initial_sidebar_state="expanded")
 
-image_path = 'final\linkedin.png'
+image_path = 'linkedin.png'
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
 
