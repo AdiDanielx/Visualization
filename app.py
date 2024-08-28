@@ -9,11 +9,11 @@ df = pd.read_csv('main_df_subset.csv')
 
 st.set_page_config(
     page_title="Skills Analysis: Job Market Insights",
-    page_icon = 'linkedinlogo.gif',
+    page_icon = 'final\linkedinlogo.gif',
     layout="wide",
     initial_sidebar_state="expanded")
 
-image_path = 'linkedin.png'
+image_path = 'final\linkedin.png'
 with open(image_path, "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode()
 
@@ -99,31 +99,18 @@ with st.sidebar:
     st.session_state.selected_state = selected_state_abbreviation
     selected_state_full_name = state_mapping[selected_state_abbreviation]
     
-    blinds_mode = 'Off'
     if 'blinds_mode' not in st.session_state:
         st.session_state.blinds_mode = 'Off'
-    st.markdown("""
-    <style>
-    div.stButton > button:first-child {
-        background-color: #fed98e;
-        color: #08519c;
-        font-weight: bold;
-        border-radius: 5px;
-        width: 100%;
-        height: 40px;
-        font-size: 16px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    if 'blinds_mode' not in st.session_state:
-        st.session_state.blinds_mode = 'Off'
+    st.session_state.blinds_mode = st.selectbox(
+        'Select Blinds Mode',
+        options=['Off', 'On'],
+        index=0 if st.session_state.blinds_mode == 'Off' else 1
+    )
+    if st.session_state.blinds_mode == 'On':
+        skill_colors = ['#dfc27d', '#80cdc1', '#f1b6da', '#b2abd2', '#ffffbf']
+    else:
+        skill_colors = ['#fbb4ae', '#b3cde3', '#ccebc5', '#decbe4', '#fed9a6']
 
-    button_text = f'Blinds Mode: Currently {st.session_state.blinds_mode} '
-
-    if st.button(button_text):
-        st.session_state.blinds_mode = 'On' if st.session_state.blinds_mode == 'Off' else 'Off'
-        st.experimental_rerun() 
 
 filtered_df_skill_state = df[(df['skill_name'] == selected_skill_name) & (df['state'] == selected_state_abbreviation)]
 
