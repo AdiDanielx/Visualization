@@ -7,34 +7,13 @@ df = pd.read_csv('main_df_subset.csv')
 
 st.set_page_config(
     page_title="Skills Analysis: Job Market Insights",
-    page_icon = 'linkedinlogo.gif',
+    page_icon = 'final/linkedinlogo.gif',
     layout="wide",
     initial_sidebar_state="expanded")
 
 st.markdown(f"## LinkedIn Job Market Dashboard: Skills & Salaries")
-# custom_css = """
-# <style>
-#     /* Change the background color of the app */
-#     .main {
-#         background-color: #FDFDFD; /* Light grey background */
-#     }
-
-#     /* Change the color of the headings */
-#     h1, h2, h3, h4, h5, h6 {
-#         color: #41C9E2; 
-#     }
-
-# </style>
-# """
-
-# # Inject custom CSS into Streamlit app
-# st.markdown(custom_css, unsafe_allow_html=True)
-
-
-
 
 df = pd.read_csv('main_df_subset.csv')
-# df = df[(df['skill_name'] != 'Other') & (df['formatted_work_type'] != 'Other') & (df['company_size'] != 'Not Specified')& (df['company_size'] != 'Not Specified')]
 
 state_mapping = {
     'NJ': 'New Jersey', 'IL': 'Illinois', 'NY': 'New York', 'CA': 'California', 'PA': 'Pennsylvania', 
