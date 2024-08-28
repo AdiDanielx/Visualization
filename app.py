@@ -258,18 +258,19 @@ with row1_col2:
         node=dict(
             pad=15,
             thickness=20,
-            line=dict(color="rgba(0, 0, 0, 0)", width=0),  # הגדרת צבע המסגרת לרקע שקוף ועובי ל-0
             label=all_labels,
-            color=node_colors
-        ),
-        link=dict(
-            source=source,
-            target=target,
-            value=value,
-            color=link_colors
-        )
+            color=node_colors,
+        st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
+        customdata=[f'<span style="font-size:14px; color:#000; background-color:transparent; border:0px;">{label}</span>' for label in all_labels]
+    ),
+    link=dict(
+        source=source,
+        target=target,
+        value=value,
+        color=link_colors
+    )
     )])
-    st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
+
 
 
     st.plotly_chart(fig)
