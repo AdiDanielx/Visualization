@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import base64
-import numpy as np
 
 df = pd.read_csv('main_df_subset.csv')
 
@@ -290,6 +289,90 @@ with row1_col2:
 #########################COL 2########################
 row2_col1, row2_col2 = st.columns(2)
 ######################## BAR CHART #######################
+# with row2_col2:
+
+#     col1, col2 = st.columns([4, 1])
+#     filtered_df_skill = df[df['skill_name'] == selected_skill_name]
+
+#     filtered_df_state = filtered_df_skill[filtered_df_skill['state'] == selected_state_abbreviation]
+
+#     available_work_types = filtered_df_state['formatted_work_type'].unique()
+    
+#     if 'selected_work_type' not in st.session_state or st.session_state.selected_work_type not in available_work_types:
+#         st.session_state.selected_work_type = available_work_types[0] if available_work_types.size > 0 else None
+
+#     with col2:
+#         if available_work_types.size > 0:
+#             selected_work_type = st.radio(
+#                 "Select Work Type",
+#                 available_work_types,
+#                 index=0 if st.session_state.selected_work_type is None else available_work_types.tolist().index(st.session_state.selected_work_type)
+#             )
+#         else:
+#             selected_work_type = None
+
+#         st.session_state.selected_work_type = selected_work_type
+
+#     selected_work_type = st.session_state.selected_work_type
+
+#     if selected_work_type:
+#         with col1:
+#             filtered_df = filtered_df_state[filtered_df_state['formatted_work_type'].isin([selected_work_type])]
+#             company_experience_data = filtered_df.groupby(['company_name', 'formatted_experience_level']).size().reset_index(name='job_count')
+            
+#             top_5_companies = company_experience_data.groupby('company_name')['job_count'].sum().nlargest(5).index
+#             top_5_data = company_experience_data[company_experience_data['company_name'].isin(top_5_companies)]
+
+#             top_5_data = top_5_data.sort_values('job_count', ascending=False)
+#             if st.session_state.blinds_mode == 'On':
+#                 color_map = {
+#                     "Internship": "#f1eef6",
+#                     "Entry level": "#d0d1e6",
+#                     "Associate": "#a6bddb",
+#                     "Mid-Senior level": "#74a9cf",
+#                     "Director": "#2b8cbe",
+#                     "Executive": "#045a8d"
+#                 }
+    
+#             else:
+#                 color_map = {
+#                     "Internship": "#e7e1ef",
+#                     "Entry level": "#9ecae1",
+#                     "Associate": "#a6bddb",
+#                     "Mid-Senior level": "#74a9cf",
+#                     "Director": "#0570b0",
+#                     "Executive": "#023858"}
+
+#             fig3 = px.bar(
+#                 top_5_data,
+#                 x='company_name',
+#                 y='job_count',
+#                 color='formatted_experience_level',
+#                 labels={'job_count': 'Job Count', 'company_name': 'Company', 'formatted_experience_level': 'Experience Level'},
+#                 barmode='stack',
+#                 color_discrete_map=color_map,
+#                 category_orders={'formatted_experience_level': ["Internship", "Entry level", "Associate", "Mid-Senior level", "Director", "Executive"]},
+#                 hover_data={'company_name': False}
+#             )
+
+#             fig3.update_layout(
+#                 xaxis=dict(
+#                     title='Company',
+#                     tickangle=-45,
+#                     automargin=True,
+#                 ),
+#                 yaxis=dict(
+#                     title='Job Count',
+#                     range=[0, top_5_data['job_count'].max() + 10]
+#                 )
+                
+#             )
+
+#             st.markdown(f"##### Top Companies for {selected_skill_name} in {selected_state_full_name}: Distribution by Experience Level of {selected_work_type}")
+#             st.plotly_chart(fig3, use_container_width=True)
+#     else:
+#         st.markdown(f"##### No data available for {selected_skill_name} in {selected_state_full_name} for the selected work type.")
+import numpy as np
 with row2_col2:
 
     col1, col2 = st.columns([4, 1])
