@@ -84,10 +84,11 @@ df['company_size_label'] = pd.Categorical(df['company_size_label'], categories=[
 ########################Side Bar#################################
 
 with st.sidebar:
-    st.sidebar.title("Select Blinds Mode")
+    st.sidebar.title("Toggle Blinds Mode (On/Off)")
     if 'blinds_mode' not in st.session_state:
         st.session_state.blinds_mode = 'Off'
     st.session_state.blinds_mode = st.selectbox(
+        'Choose Blinds Mode:',
         options=['Off', 'On'],
         index=0 if st.session_state.blinds_mode == 'Off' else 1
     )
