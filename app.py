@@ -243,7 +243,7 @@ with row1_col2:
     if st.session_state.blinds_mode == 'On':
         skill_colors = ['#dfc27d', '#80cdc1', '#f1b6da', '#b2abd2', '#ffffbf']
     else:
-        skill_colors = ['#fbb4ae', '#b3cde3', '#ccebc5', '#decbe4', '#fed9a6']
+        skill_colors = ['#E8D3FF', '#C6CFFF', '#A6E3E9', '#CAF4FF', '#FFE0B5']
         # skill_colors = ['#D3F4FF', '#B2DFFB', '#B1E8ED', '#C6CBEF', '#CDFFEB']
     skill_color_map = {skill: skill_colors[i] for i, skill in enumerate(top_skills)}
     node_colors = []
