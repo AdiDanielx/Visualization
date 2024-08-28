@@ -260,7 +260,6 @@ with row1_col2:
             thickness=20,
             label=all_labels,
             color=node_colors,
-        st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
         customdata=[f'<span style="font-size:14px; color:#000; background-color:transparent; border:0px;">{label}</span>' for label in all_labels]
     ),
     link=dict(
