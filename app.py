@@ -260,7 +260,6 @@ with row1_col2:
             thickness=20,
             label=all_labels,
             color=node_colors,
-        customdata=[f'<span style="font-size:14px; color:#000; background-color:transparent; border:0px;">{label}</span>' for label in all_labels]
     ),
     link=dict(
         source=source,
