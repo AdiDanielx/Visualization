@@ -259,16 +259,15 @@ with row1_col2:
             pad=15,
             thickness=20,
             label=all_labels,
-            color=node_colors,
-    ),
-    link=dict(
-        source=source,
-        target=target,
-        value=value,
-        color=link_colors
-    )
-)])
-
+            color=node_colors
+        ),
+        link=dict(
+            source=source,
+            target=target,
+            value=value,
+            color=link_colors
+        )
+    )])
 
     fig.update_traces(texttemplate='%{customdata}')
 
