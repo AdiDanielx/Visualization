@@ -219,14 +219,14 @@ with row1_col2:
         node=dict(
             pad=15,
             thickness=20,
-            line=dict(color="black", width=0.5),
+            line=dict(color="white", width=0.5),  # קו מסביב לתוויות בצבע לבן
             label=all_labels,
             color=node_colors,
             hoverlabel=dict(
                 font=dict(
-                    family="Calibri",  # שינוי הפונט ל-CALIBRI
+                    family="Calibri",
                     size=16,
-                    color="grey"  # צבע הטקסט אפור
+                    color="grey"  # צבע הפונט אפור
                 )
             )
         ),
@@ -238,14 +238,19 @@ with row1_col2:
         )
     )])
     
-    # שינוי הפונט של הטקסט הראשי בגרף ל-CALIBRI
+    # שינוי הפונט של הטקסט הראשי בגרף ל-CALIBRI עם צבע לבן מסביב
     fig.update_layout(
         font=dict(
-            family="Calibri",  # פונט CALIBRI
-            size=16,  # אפשר להתאים את הגודל לפי הצורך
-            color="grey"  # צבע הטקסט אפור
+            family="Calibri",
+            size=16,
+            color="grey",  # צבע הטקסט אפור
         )
     )
+    
+    # שינוי צבע הקו מסביב ללבן
+    for annotation in fig['layout']['annotations']:
+        annotation['bordercolor'] = "white"  # צבע קונטור לבן
+        annotation['borderwidth'] = 2  # עובי הקונטור
     
     st.plotly_chart(fig)
         
