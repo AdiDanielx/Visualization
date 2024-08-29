@@ -267,9 +267,6 @@ with row1_col2:
     st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
 
 
-    st.plotly_chart(fig)
-
-
 #########################COL 2########################
 row2_col1, row2_col2 = st.columns(2)
 ######################## BAR CHART #######################
