@@ -128,7 +128,7 @@ row1_col1, row1_col2 = st.columns(2)
 
 with row1_col1:
 ########################MAP PLOT#################################
-
+    st.markdown(f'##### Skill Distribution in Job Postings for {selected_skill_name} across the USA')
     filtered_df = df[df['skill_name'] == selected_skill_name]
 
     state_job_counts = filtered_df.groupby('state')['job_id'].count().reset_index()
@@ -184,8 +184,6 @@ with row1_col1:
         lenmode="pixels", len=300, yanchor="top", y=1,
         ticks="outside"
     ))
-    st.markdown(f'##### Skill Distribution in Job Postings for {selected_skill_name} across the USA')
-
     st.plotly_chart(fig)
 
 ########################SNAKEY PLOT#######################
