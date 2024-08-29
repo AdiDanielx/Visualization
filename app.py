@@ -386,7 +386,7 @@ with row2_col2:
             names='Category',
             values='Job Postings',
             labels={'Job Postings': 'Number of Job Postings'},
-            color_discrete_sequence=['#a6bddb', '#3690c0'])
+            color_discrete_sequence=['#9ecae1', '#0570b0'])
 
             fig_pie.update_layout(
                 title=f'Job Postings Distribution for {selected_skill_name}')
@@ -401,7 +401,7 @@ with row2_col2:
                 x='company_name',
                 y='job_postings',
                 labels={'job_postings': 'Job Postings', 'company_name': 'Company'},
-                color_discrete_sequence=['#3690c0'])
+                color_discrete_sequence=['#0570b0'])
 
             fig_fallback.update_layout(
                 xaxis=dict(title='Company', tickangle=-45, automargin=True),
