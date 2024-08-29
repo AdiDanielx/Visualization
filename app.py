@@ -6,7 +6,6 @@ import base64
 import numpy as np
 
 df = pd.read_csv('main_df_subset.csv')
-
 st.set_page_config(
     page_title="Skills Analysis: Job Market Insights",
     page_icon = 'linkedinlogo.gif',
