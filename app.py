@@ -225,8 +225,8 @@ with row1_col2:
             hoverlabel=dict(
                 font=dict(
                     family="Calibri",
-                    size=16,
-                    color="grey"  # צבע הטקסט אפור
+                    size=12,
+                    color="white"  # צבע הטקסט אפור
                 )
             )
         ),
@@ -238,14 +238,14 @@ with row1_col2:
         )
     )])
     
-    # שינוי הפונט של הטקסט הראשי בגרף לקונטור אפור עם צבע לבן מסביב
-    fig.update_layout(
-        font=dict(
-            family="Calibri",
-            size=18,
-            color="grey"  # צבע הטקסט אפור
-        )
-    )
+    # # שינוי הפונט של הטקסט הראשי בגרף לקונטור אפור עם צבע לבן מסביב
+    # fig.update_layout(
+    #     font=dict(
+    #         family="Calibri",
+    #         size=18,
+    #         color="grey"  # צבע הטקסט אפור
+    #     )
+    # )
     
     st.plotly_chart(fig)
     st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
