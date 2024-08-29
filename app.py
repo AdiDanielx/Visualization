@@ -219,14 +219,14 @@ with row1_col2:
         node=dict(
             pad=15,
             thickness=20,
-            line=dict(color="white", width=0.5),
+            line=dict(color="black", width=0.5),
             label=all_labels,
             color=node_colors,
             hoverlabel=dict(
                 font=dict(
-                    family="Calibri",
+                    family="Calibri",  # שינוי הפונט ל-CALIBRI
                     size=16,
-                    color="white"  # צבע הטקסט אפור
+                    color="grey"  # צבע הטקסט אפור
                 )
             )
         ),
@@ -238,16 +238,17 @@ with row1_col2:
         )
     )])
     
-    # # שינוי הפונט של הטקסט הראשי בגרף לקונטור אפור עם צבע לבן מסביב
-    # fig.update_layout(
-    #     font=dict(
-    #         family="Calibri",
-    #         size=18,
-    #         color="grey"  # צבע הטקסט אפור
-    #     )
-    # )
+    # שינוי הפונט של הטקסט הראשי בגרף ל-CALIBRI
+    fig.update_layout(
+        font=dict(
+            family="Calibri",  # פונט CALIBRI
+            size=16,  # אפשר להתאים את הגודל לפי הצורך
+            color="grey"  # צבע הטקסט אפור
+        )
+    )
     
     st.plotly_chart(fig)
+        
     st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
 
 
