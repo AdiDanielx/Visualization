@@ -188,6 +188,7 @@ with row1_col1:
 
 ########################SNAKEY PLOT#######################
 with row1_col2:
+    st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
     state_filtered = df[df['state'] == selected_state_abbreviation]
     top_skills = state_filtered['skill_name'].value_counts()
     top_skills = top_skills[top_skills.index != 'other'].head(5).index.tolist()
@@ -252,7 +253,6 @@ with row1_col2:
     
     st.plotly_chart(fig)
         
-    st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
 
 
 #########################COL 2########################
