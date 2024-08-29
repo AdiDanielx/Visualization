@@ -224,8 +224,8 @@ with row1_col2:
             color=node_colors,
             hoverlabel=dict(
                 font=dict(
-                    family="Arial",  # שינוי הפונט למשהו אחר כמו "Verdana" או "Times New Roman"
-                    size=12,  # שינוי גודל הפונט
+                    family="Arial",  # שינוי הפונט
+                    size=16,  # הגדלת גודל הפונט
                     color="black"  # צבע הפונט
                 )
             )
@@ -237,15 +237,15 @@ with row1_col2:
             color=link_colors
         )
     )])
-
+    
     fig.update_layout(
         font=dict(
-            family="Arial",  # שינוי הפונט של כל הכיתוב בגרף
-            size=14,  # שינוי גודל הפונט של כל הכיתוב בגרף
-            color="black"  # צבע הפונט
+            family="Arial",  # פונט בעל נראות טובה יותר
+            size=18,  # גודל פונט גדול יותר לנראות טובה יותר
+            color="black"  # צבע הפונט לשמירה על ניגודיות
         )
     )
-
+    
     st.plotly_chart(fig)
     st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
 
