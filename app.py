@@ -219,13 +219,13 @@ with row1_col2:
         node=dict(
             pad=15,
             thickness=20,
-            line=dict(color="black", width=0.5),
+            line=dict(color="white", width=0.5),
             label=all_labels,
             color=node_colors,
             hoverlabel=dict(
                 font=dict(
                     family="Calibri",
-                    size=12,
+                    size=16,
                     color="white"  # צבע הטקסט אפור
                 )
             )
