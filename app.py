@@ -226,7 +226,9 @@ with row1_col2:
                 font=dict(
                     family="Arial",
                     size=16,
-                    color="grey",  # צבע הפונט אפור
+                    color="grey",  # צבע הטקסט אפור
+                    outlinewidth=1,  # עובי הקונטור מסביב לטקסט
+                    outlinecolor="white"  # צבע הקונטור לבן
                 )
             )
         ),
@@ -238,30 +240,20 @@ with row1_col2:
         )
     )])
     
-    # הוספת קונטור לבן לפונט
+    # שינוי הפונט והקונטור לטקסט הראשי בגרף
     fig.update_layout(
         font=dict(
             family="Arial",
             size=18,
-            color="grey",  # צבע הפונט אפור
-        ),
-        annotations=[
-            dict(
-                x=0.5,
-                y=0.5,
-                xref="paper",
-                yref="paper",
-                text="",
-                showarrow=False,
-                font=dict(
-                    size=16,
-                    color="grey",
-                ),
-                bordercolor="white",  # צבע קונטור לבן
-                borderwidth=2  # רוחב הקונטור
-            )
-        ]
+            color="grey",  # צבע הטקסט אפור
+        )
     )
+    
+    # הוספת קונטור לבן לטקסט הראשי בגרף
+    for annotation in fig['layout']['annotations']:
+        annotation['font']['color'] = "grey"
+        annotation['bordercolor'] = "white"  # צבע קונטור לבן
+        annotation['borderwidth'] = 2  # עובי הקונטור
     
     st.plotly_chart(fig)
     st.markdown(f"##### Skill Distribution in Job Postings for {selected_skill_name} in {selected_state_full_name}")
