@@ -224,9 +224,9 @@ with row1_col2:
             color=node_colors,
             hoverlabel=dict(
                 font=dict(
-                    family="Arial",  # שינוי הפונט
-                    size=16,  # הגדלת גודל הפונט
-                    color="black"  # צבע הפונט
+                    family="Arial",
+                    size=16,
+                    color="grey",  # צבע הפונט אפור
                 )
             )
         ),
@@ -238,12 +238,29 @@ with row1_col2:
         )
     )])
     
+    # הוספת קונטור לבן לפונט
     fig.update_layout(
         font=dict(
-            family="Arial",  # פונט בעל נראות טובה יותר
-            size=18,  # גודל פונט גדול יותר לנראות טובה יותר
-            color="black"  # צבע הפונט לשמירה על ניגודיות
-        )
+            family="Arial",
+            size=18,
+            color="grey",  # צבע הפונט אפור
+        ),
+        annotations=[
+            dict(
+                x=0.5,
+                y=0.5,
+                xref="paper",
+                yref="paper",
+                text="",
+                showarrow=False,
+                font=dict(
+                    size=16,
+                    color="grey",
+                ),
+                bordercolor="white",  # צבע קונטור לבן
+                borderwidth=2  # רוחב הקונטור
+            )
+        ]
     )
     
     st.plotly_chart(fig)
